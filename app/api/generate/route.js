@@ -5,7 +5,7 @@ import { createContent, shortId } from "@/lib/store";
 
 export async function POST(req) {
   const me = await currentUser();
-  const { original, authorEmail } = await req.json();
+  const { original, authorEmail, imageUrls } = await req.json();
   if (!original || original.length < 50) return NextResponse.json({ error: "Min 50 chars" }, { status: 400 });
   const email = me?.email || authorEmail || "founder@rockybco.com";
   const brand = me?.brand || {};
@@ -17,6 +17,6 @@ export async function POST(req) {
     rules: brand.rules || "",
     original,
   });
-  const item = await createContent({ authorId: me?.id || null, authorEmail: email, original, linkedin: out.linkedin, carousel: out.carousel, thread: out.thread });
+  const item = await createContent({ authorId: me?.id || null, authorEmail: email, original, linkedin: out.linkedin, carousel: out.carousel, thread: out.thread, images: imageUrls });
   return NextResponse.json({ ok: true, id: item.id, short: shortId(item.id) });
 }

@@ -1,18 +1,29 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { signSession, COOKIE } from "@/lib/auth";
-import { getUserByEmail, createUser, setVerified } from "@/lib/store";
+import { getUserByEmail, createUser, setVerified, getInviteByToken, acceptInvite } from "@/lib/store";
 
 // No-OTP signup (locked): create account → welcome email → instant session → onboarding.
+// Optional invite token grants creator/reviewer role (never admin).
 export async function POST(req) {
-  const { email, name, password } = await req.json();
+  const { email, name, password, invite } = await req.json();
   if (!email || !password || password.length < 6) {
     return NextResponse.json({ error: "Name, email and password (min 6 chars) required" }, { status: 400 });
   }
   const existing = await getUserByEmail(email);
   if (existing) return NextResponse.json({ error: "Account exists — log in instead", login: true }, { status: 409 });
-  // Public signup is creator-only. Admin/reviewer accounts are seeded privately (scripts/seed-admins.mjs).
-  const u = await createUser({ email, name: name || email.split("@")[0], role: "creator", passwordHash: await bcrypt.hash(password, 10) });
+  let role = "creator";
+  if (invite) {
+    const inv = await getInviteByToken(invite);
+    if (!inv || inv.accepted || inv.email.toLowerCase() !== email.toLowerCase()) {
+      return NextResponse.json({ error: "Invite invalid, used, or for a different email" }, { status: 400 });
+    }
+    role = inv.role === "reviewer" ? "reviewer" : "creator";
+  }
+  // Public signup is creator-only unless a valid invite grants reviewer.
+  // Admin accounts are seeded privately (scripts/seed-admins.mjs).
+  const u = await createUser({ email, name: name || email.split("@")[0], role, passwordHash: await bcrypt.hash(password, 10) });
+  if (invite) await acceptInvite(invite);
   // Verified immediately — no OTP in this flow.
   await setVerified(email);
 

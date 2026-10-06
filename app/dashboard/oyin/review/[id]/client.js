@@ -25,6 +25,12 @@ export default function ReviewClient({ item }) {
 
   return (
     <div>
+      {(item.images || []).length > 0 && (
+        <div className="card mb-4">
+          <div className="font-bold text-sm">🖼 Attached pictures ({item.images.length})</div>
+          <div className="flex gap-2 mt-2 flex-wrap">{item.images.map((u, i) => <a key={i} href={u} target="_blank"><img src={u} alt="" className="h-20 w-20 rounded object-cover border" /></a>)}</div>
+        </div>
+      )}
       <div className="grid md:grid-cols-2 gap-4">
         <div className="card"><div className="font-bold text-sm">ORIGINAL (from {item.authorEmail}, read-only)</div><div className="text-sm mt-2 bg-gray-50 p-3 rounded">{item.original}</div></div>
         <div className="card"><div className="font-bold text-sm">YOUR REVIEW &amp; EDITS</div><textarea className="input mt-2" rows={10} value={linkedin} onChange={(e) => setLinkedin(e.target.value)} /></div>

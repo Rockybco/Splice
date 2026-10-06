@@ -22,6 +22,12 @@ export default async function ContentPage({ params }) {
         <div className="card"><div className="font-bold text-sm">ORIGINAL (read-only)</div><div className="text-sm mt-2 bg-gray-50 p-3 rounded">{c.original}</div></div>
         <div className="card"><div className="font-bold text-sm">GENERATED (editable)</div><textarea className="input mt-2" rows={10} defaultValue={c.linkedin} /></div>
       </div>
+      {(c.images || []).length > 0 && (
+        <div className="card mt-4">
+          <div className="font-bold text-sm">🖼 Attached pictures ({c.images.length}) — shown on LinkedIn text post as link preview; add to Canva for IG</div>
+          <div className="flex gap-2 mt-2 flex-wrap">{c.images.map((u, i) => <a key={i} href={u} target="_blank"><img src={u} alt="" className="h-24 w-24 rounded object-cover border" /></a>)}</div>
+        </div>
+      )}
       <div className="card mt-4">
         <div className="font-bold text-sm">📸 Instagram Carousel — 6-slide blueprint (add images in Canva 1080×1350)</div>
         {(c.carousel || []).map((s, i) => <textarea key={i} className="input mt-2" rows={2} defaultValue={s} />)}
