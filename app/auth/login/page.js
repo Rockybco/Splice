@@ -11,8 +11,7 @@ export default function Login() {
     const r = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
     const j = await r.json();
     if (j.ok) window.location.href = j.role === "reviewer" ? "/dashboard/oyin" : j.role === "admin" ? "/admin/dashboard" : "/dashboard";
-    else if (j.verify) window.location.href = "/auth/verify-otp";
-    else setMsg(j.error);
+    else setMsg(j.error || "Invalid email or password");
   }
   return (
     <div className="min-h-screen grid place-items-center px-4">

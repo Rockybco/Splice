@@ -1,33 +1,38 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { getUserByEmail, createUser, saveOtp } from "@/lib/store";
+import { signSession, COOKIE } from "@/lib/auth";
+import { getUserByEmail, createUser, setVerified } from "@/lib/store";
 
+// No-OTP signup (locked): create account → welcome email → instant session → onboarding.
 export async function POST(req) {
-  const { email, name, password = "splice-dev" } = await req.json();
-  if (!email) return NextResponse.json({ error: "Email required" }, { status: 400 });
-  let u = await getUserByEmail(email);
-  if (!u) {
-    const role = email.includes("oyin") ? "reviewer" : email.includes("rockyb") ? "admin" : "creator";
-    u = await createUser({ email, name: name || email.split("@")[0], role, passwordHash: await bcrypt.hash(password, 10) });
+  const { email, name, password } = await req.json();
+  if (!email || !password || password.length < 6) {
+    return NextResponse.json({ error: "Name, email and password (min 6 chars) required" }, { status: 400 });
   }
-  const code = String(Math.floor(100000 + Math.random() * 900000));
-  await saveOtp({ email, code, kind: "signup" });
+  const existing = await getUserByEmail(email);
+  if (existing) return NextResponse.json({ error: "Account exists — log in instead", login: true }, { status: 409 });
+  const role = email.includes("oyin") ? "reviewer" : email.includes("rockyb") ? "admin" : "creator";
+  const u = await createUser({ email, name: name || email.split("@")[0], role, passwordHash: await bcrypt.hash(password, 10) });
+  // Verified immediately — no OTP in this flow.
+  await setVerified(email);
+
+  // Best-effort welcome email (never blocks signup).
   if (process.env.RESEND_API_KEY) {
     try {
       const { Resend } = await import("resend");
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const { error } = await resend.emails.send({
+      const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
         from: "Splice <onboarding@resend.dev>",
         to: email,
-        subject: "Your Splice access code",
-        html: `<h2>Welcome to Splice 🧵</h2><p>Your 6-digit access code is:</p><h1>${code}</h1><p>Expires in 10 minutes. 3 attempts max.</p>`,
+        subject: "Welcome to Splice 🧵",
+        html: `<h2>Welcome to Splice, ${u.name} 🧵</h2><p>Your workspace is ready. Paste a LinkedIn post and we'll handle the rest.</p><p><a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/onboarding/step-1">Set up your brand voice →</a></p>`,
       });
-      if (error) throw new Error(typeof error === "object" ? error.message || JSON.stringify(error) : error);
-      return NextResponse.json({ ok: true });
-    } catch (e) {
-      console.error("Resend failed, falling back to devCode:", e?.message);
-      return NextResponse.json({ ok: true, devCode: code, emailWarning: `Email send failed (${e?.message}). Use dev code.` });
-    }
+      if (error) console.error("Welcome mail failed:", error.message || error);
+    } catch (e) { console.error("Welcome mail failed:", e?.message); }
   }
-  return NextResponse.json({ ok: true, devCode: code });
+
+  const fresh = (await getUserByEmail(email)) || u;
+  const token = signSession({ id: fresh.id, email: fresh.email, role: fresh.role, name: fresh.name });
+  const res = NextResponse.json({ ok: true, role: fresh.role });
+  res.cookies.set(COOKIE, token, { httpOnly: true, path: "/", maxAge: 60 * 60 * 12 });
+  return res;
 }

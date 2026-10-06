@@ -2,12 +2,11 @@
 
 Still NO BUILD — waiting for UI drop in `splice/ui-drop/` + go-ahead.
 
-## 1. Auth — Follow V1
-- Signup fields: Name + Email + Password + Confirm Password
-- Auto-send 6-digit OTP to email on signup
-- Must verify OTP before onboarding (`/auth/verify-otp`)
-- Later logins: Email + Password (+ Forgot Password / Create Account)
-- OTP via Resend. Hash passwords (bcrypt). Secure sessions. Rate-limit OTP resend.
+## 1. Auth — V1 passwords, NO OTP signup (locked 2026-10-06)
+- Signup fields: Name + Email + Password (min 6). Account created verified instantly.
+- Welcome email sent best-effort via Resend ("you created an account with Splice").
+- No OTP verify page (removed — Resend test mode can't deliver codes to non-owner inboxes).
+- Later logins: Email + Password (+ Forgot via reset-code email, dev fallback shown when mail fails).
 
 ## 2. Stack — Follow SPLICE
 - Frontend: Next.js + React + TypeScript (App Router, existing `splice/frontend/app/...` folders)
