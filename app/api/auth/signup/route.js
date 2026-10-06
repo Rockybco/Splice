@@ -26,6 +26,20 @@ export async function POST(req) {
   db.otps = db.otps.filter((o) => o.email !== email);
   db.otps.push({ email, code, exp: Date.now() + 10 * 60 * 1000 });
   save(db);
-  // TODO: send via Resend when RESEND_API_KEY set.
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const { Resend } = await import("resend");
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({
+        from: "Splice <onboarding@resend.dev>",
+        to: email,
+        subject: "Your Splice access code",
+        html: `<h2>Welcome to Splice 🧵</h2><p>Your 6-digit access code is:</p><h1>${code}</h1><p>Expires in 10 minutes. 3 attempts max.</p>`,
+      });
+      return NextResponse.json({ ok: true });
+    } catch (e) {
+      console.error("Resend failed, falling back to devCode:", e?.message);
+    }
+  }
   return NextResponse.json({ ok: true, devCode: code });
 }
