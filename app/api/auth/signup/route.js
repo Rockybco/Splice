@@ -11,8 +11,8 @@ export async function POST(req) {
   }
   const existing = await getUserByEmail(email);
   if (existing) return NextResponse.json({ error: "Account exists — log in instead", login: true }, { status: 409 });
-  const role = email.includes("oyin") ? "reviewer" : email.includes("rockyb") ? "admin" : "creator";
-  const u = await createUser({ email, name: name || email.split("@")[0], role, passwordHash: await bcrypt.hash(password, 10) });
+  // Public signup is creator-only. Admin/reviewer accounts are seeded privately (scripts/seed-admins.mjs).
+  const u = await createUser({ email, name: name || email.split("@")[0], role: "creator", passwordHash: await bcrypt.hash(password, 10) });
   // Verified immediately — no OTP in this flow.
   await setVerified(email);
 
