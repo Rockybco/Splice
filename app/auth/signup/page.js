@@ -10,7 +10,7 @@ export default function Signup() {
     setMsg("");
     const r = await fetch("/api/auth/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, name }) });
     const j = await r.json();
-    if (j.devCode) setMsg(`OTP sent (dev: ${j.devCode}). Continue → /auth/verify-otp`);
+    if (j.devCode) setMsg(`${j.emailWarning || `OTP sent (dev: ${j.devCode})`}. Continue → /auth/verify-otp`);
     else setMsg(j.error || "Sent");
   }
   return (

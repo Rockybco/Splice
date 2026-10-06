@@ -32,15 +32,17 @@ export async function POST(req) {
     try {
       const { Resend } = await import("resend");
       const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
+      const { error } = await resend.emails.send({
         from: "Splice <onboarding@resend.dev>",
         to: email,
         subject: "Your Splice access code",
         html: `<h2>Welcome to Splice 🧵</h2><p>Your 6-digit access code is:</p><h1>${code}</h1><p>Expires in 10 minutes. 3 attempts max.</p>`,
       });
+      if (error) throw new Error(typeof error === "object" ? error.message || JSON.stringify(error) : error);
       return NextResponse.json({ ok: true });
     } catch (e) {
       console.error("Resend failed, falling back to devCode:", e?.message);
+      return NextResponse.json({ ok: true, devCode: code, emailWarning: `Email send failed (${e?.message}). Use dev code.` });
     }
   }
   return NextResponse.json({ ok: true, devCode: code });
