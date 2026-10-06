@@ -1,0 +1,18 @@
+/* SPLICE design tokens — placeholders only, NOT wired to Tailwind yet. */
+/* Waiting for Stitchify UI drop before building. */
+:root {
+  --splice-teal: #0D7377;
+  --splice-cream: #F4E8DC;
+  --splice-amber: #D4A574;
+  --splice-dark: #0F1419;
+  --splice-error: #E63946;
+  --splice-success: #2A9D8F;
+  --splice-white: #FFFFFF;
+  --splice-light-gray: #F8F6F2;
+  --splice-font: 'Inter', system-ui, sans-serif;
+  --splice-radius-btn: 6px;
+  --splice-radius-card: 8px;
+  --splice-space-sm: 12px;
+  --splice-space-md: 24px;
+  --splice-space-lg: 48px;
+}

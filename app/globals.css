@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --splice-teal: #0D7377;
+  --splice-cream: #F4E8DC;
+  --splice-amber: #D4A574;
+  --splice-dark: #0F1419;
+  --splice-error: #E63946;
+  --splice-success: #2A9D8F;
+}
+
+body { background: var(--splice-cream); color: var(--splice-dark); font-family: Inter, system-ui, sans-serif; }
+
+.card { @apply rounded-lg border bg-white p-6 shadow-sm; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; }
+.btn { @apply rounded-md px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50; background: #D4A574; border-radius: 6px; }
+.btn:hover { filter: brightness(0.95); }
+.btn2 { @apply rounded-md border px-4 py-2 text-sm font-semibold transition-transform hover:scale-[1.02]; border-color: #0D7377; color: #0F1419; border-radius: 6px; background: #fff; }
+.btn-danger { @apply rounded-md px-4 py-2 text-sm font-semibold text-white; background: #E63946; border-radius: 6px; }
+.input { @apply w-full rounded-md border bg-white px-3 py-3 text-sm outline-none; border-radius: 6px; }
+.input:focus { border-color: #0D7377; box-shadow: 0 0 0 2px rgba(13,115,119,0.15); }
+.label { @apply mb-1 block text-sm font-medium; color: #0F1419; font-size: 14px; }
+.badge { @apply inline-block rounded-full px-2 py-0.5 text-xs font-semibold; }
+.tab-active { color: #0F1419; border-bottom: 2px solid #0D7377; }
+.toast-success { background: #2A9D8F; color: #fff; }
+.toast-error { background: #E63946; color: #fff; }
+@keyframes splice-shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.shake { animation: splice-shake 200ms ease-in-out; }
+@keyframes splice-fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: splice-fade-up 300ms ease-out; }
