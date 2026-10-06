@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { repurpose } from "@/lib/gemini";
+import { mirrorContent } from "@/lib/supabase-mirror";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -22,5 +23,6 @@ export async function POST(req) {
   const item = { id: "SP-" + Math.floor(1000 + Math.random() * 9000), authorEmail, original, linkedin: out.linkedin, carousel: out.carousel, thread: out.thread, status: "Draft", createdAt: new Date().toISOString(), impressions: 0 };
   db.contents.unshift(item);
   save(db);
+  mirrorContent(item);
   return NextResponse.json({ ok: true, id: item.id });
 }

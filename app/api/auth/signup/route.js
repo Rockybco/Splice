@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "node:fs";
 import path from "node:path";
 import bcrypt from "bcryptjs";
+import { mirrorProfile } from "@/lib/supabase-mirror";
 
 const DB = path.join(process.cwd(), "splice", "data", "db.json");
 function load() {
@@ -26,6 +27,7 @@ export async function POST(req) {
   db.otps = db.otps.filter((o) => o.email !== email);
   db.otps.push({ email, code, exp: Date.now() + 10 * 60 * 1000 });
   save(db);
+  mirrorProfile(u);
   if (process.env.RESEND_API_KEY) {
     try {
       const { Resend } = await import("resend");
