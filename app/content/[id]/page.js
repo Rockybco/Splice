@@ -3,6 +3,7 @@ import { Shell, creatorNav } from "@/components/SpliceShell";
 import { currentUser } from "@/lib/guard";
 import { getContent, shortId } from "@/lib/store";
 import SubmitButton from "./submit";
+import PublishButton from "./publish";
 
 export default async function ContentPage({ params }) {
   const me = await currentUser();
@@ -32,7 +33,7 @@ export default async function ContentPage({ params }) {
       <div className="flex gap-2 mt-4 items-center">
         <span className="text-sm text-gray-500">Status: <b>{c.status}</b></span>
         <SubmitButton id={c.id} status={c.status} />
-        <a className="btn" href="/history">Post to LinkedIn</a>
+        <PublishButton id={c.id} status={c.status} isReviewerOwn={me.role === "reviewer" && c.authorEmail === me.email} />
         <a className="btn2" href="/history">Share to LinkedIn Composer</a>
       </div>
       {c.feedback && <div className="card mt-3 text-sm"><b>Oyin&apos;s feedback:</b> {c.feedback}</div>}
