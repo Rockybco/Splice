@@ -1,4 +1,8 @@
+import { redirect } from "next/navigation";
 import { Shell, adminNav } from "@/components/SpliceShell";
-const T = ({ t, children }) => <div className="card mt-4"><div className="font-bold">{t}</div><div className="text-sm text-gray-600 mt-1">{children}</div></div>;
-export function TeamActivity() { return <Shell title="Team" crumbs={["Admin", "Team Activity"]} nav={adminNav} user="Admin"><T t="Team Activity">Timeline + table + Export CSV/PDF (monitor only).</T></Shell>; }
-export default TeamActivity;
+import { currentUser } from "@/lib/guard";
+export default function TeamActivity() {
+  const me = currentUser();
+  if (!me || me.role !== "admin") redirect("/auth/signup");
+  return <Shell title="Team" crumbs={["Admin", "Team Activity"]} nav={adminNav} user="Admin"><div className="card mt-4"><div className="font-bold">Team Activity</div><div className="text-sm text-gray-600 mt-1">Timeline + table + Export CSV/PDF (monitor only).</div></div></Shell>;
+}

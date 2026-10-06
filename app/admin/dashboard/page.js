@@ -1,5 +1,9 @@
+import { redirect } from "next/navigation";
 import { Shell, adminNav } from "@/components/SpliceShell";
+import { currentUser } from "@/lib/guard";
 export default function AdminDash() {
+  const me = currentUser();
+  if (!me || me.role !== "admin") redirect("/auth/signup");
   return (
     <Shell title="Admin" crumbs={["Admin Dashboard", "Overview"]} nav={adminNav} user="Rocky B. (Admin)">
       <div className="grid md:grid-cols-4 gap-4">

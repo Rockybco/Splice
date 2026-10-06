@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { Shell, creatorNav } from "@/components/SpliceShell";
+import { currentUser } from "@/lib/guard";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -10,6 +12,8 @@ function getContents() {
 }
 
 export default function Dashboard() {
+  const me = currentUser();
+  if (!me) redirect("/auth/signup");
   const contents = getContents().slice(0, 3);
   return (
     <Shell title="Dashboard" crumbs={["Splice OS", "Dashboard Overview"]} nav={creatorNav} user="Rocky B." actions={<a className="btn" href="/generate">+ New Splice</a>}>

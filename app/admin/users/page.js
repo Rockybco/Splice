@@ -1,7 +1,11 @@
+import { redirect } from "next/navigation";
 import { Shell, adminNav } from "@/components/SpliceShell";
+import { currentUser } from "@/lib/guard";
 import fs from "node:fs";
 import path from "node:path";
 export default function AdminUsers() {
+  const me = currentUser();
+  if (!me || me.role !== "admin") redirect("/auth/signup");
   let users = [];
   try { users = JSON.parse(fs.readFileSync(path.join(process.cwd(), "splice", "data", "db.json"), "utf-8")).users || []; } catch {}
   return (

@@ -1,7 +1,11 @@
+import { redirect } from "next/navigation";
 import { Shell, oyinNav } from "@/components/SpliceShell";
+import { currentUser } from "@/lib/guard";
 import fs from "node:fs";
 import path from "node:path";
 export default function Queue() {
+  const me = currentUser();
+  if (!me || me.role !== "reviewer") redirect("/auth/signup");
   let items = [];
   try {
     const db = JSON.parse(fs.readFileSync(path.join(process.cwd(), "splice", "data", "db.json"), "utf-8"));

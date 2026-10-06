@@ -1,2 +1,8 @@
+import { redirect } from "next/navigation";
 import { Shell, adminNav } from "@/components/SpliceShell";
-export default function P() { return <Shell title="Analytics" crumbs={["Admin", "Analytics"]} nav={adminNav} user="Admin"><div className="card"><div className="font-bold">User growth · Posts/day · Success 92/5/2/1 · Engagement · Feature use</div></div></Shell>; }
+import { currentUser } from "@/lib/guard";
+export default function P() {
+  const me = currentUser();
+  if (!me || me.role !== "admin") redirect("/auth/signup");
+  return <Shell title="Analytics" crumbs={["Admin", "Analytics"]} nav={adminNav} user="Admin"><div className="card"><div className="font-bold">User growth · Posts/day · Success 92/5/2/1 · Engagement · Feature use</div></div></Shell>;
+}

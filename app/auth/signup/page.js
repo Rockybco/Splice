@@ -23,7 +23,7 @@ export default function Signup() {
         <label className="label mt-3">Work email</label>
         <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="founder@rockybco.com" required />
         <button className="btn w-full mt-4">Send OTP</button>
-        <div className="text-sm mt-3">Already have an account? <a className="underline" href="/api/auth/login">Log in</a></div>
+        <div className="text-sm mt-3">Already have an account? <a className="underline" href="/auth/login">Log in</a></div>
         {msg && <div className="text-sm mt-3 p-2 rounded bg-[#F8F6F2]">{msg}</div>}
       </form>
     </div>

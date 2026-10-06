@@ -1,4 +1,5 @@
 import { Shell, creatorNav } from "@/components/SpliceShell";
+import SubmitButton from "./submit";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -28,10 +29,13 @@ export default function ContentPage({ params }) {
         {(c.thread || []).map((t, i) => <div key={i}><div className="text-xs mt-2">{i + 1}/5 · {t.length}/280</div><textarea className="input" rows={2} defaultValue={t} /></div>)}
         <div className="flex gap-2 mt-3"><span className="btn">📋 Copy Thread</span><span className="btn2">Send to Typefully</span><span className="btn2">Open in X</span></div>
       </div>
-      <div className="flex gap-2 mt-4">
+      <div className="flex gap-2 mt-4 items-center">
+        <span className="text-sm text-gray-500">Status: <b>{c.status}</b></span>
+        <SubmitButton id={c.id} status={c.status} />
         <a className="btn" href="/history">Post to LinkedIn</a>
         <a className="btn2" href="/history">Share to LinkedIn Composer</a>
       </div>
+      {c.feedback && <div className="card mt-3 text-sm"><b>Oyin&apos;s feedback:</b> {c.feedback}</div>}
     </Shell>
   );
 }
