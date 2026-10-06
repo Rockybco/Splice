@@ -4,6 +4,8 @@ import { currentUser } from "@/lib/guard";
 import { getContent, shortId } from "@/lib/store";
 import SubmitButton from "./submit";
 import PublishButton from "./publish";
+import ScheduleForm from "./schedule";
+import ExportButtons from "./export";
 
 export default async function ContentPage({ params }) {
   const me = await currentUser();
@@ -30,12 +32,14 @@ export default async function ContentPage({ params }) {
         {(c.thread || []).map((t, i) => <div key={i}><div className="text-xs mt-2">{i + 1}/5 · {t.length}/280</div><textarea className="input" rows={2} defaultValue={t} /></div>)}
         <div className="flex gap-2 mt-3"><span className="btn">📋 Copy Thread</span><span className="btn2">Send to Typefully</span><span className="btn2">Open in X</span></div>
       </div>
-      <div className="flex gap-2 mt-4 items-center">
+      <div className="flex gap-2 mt-4 items-center flex-wrap">
         <span className="text-sm text-gray-500">Status: <b>{c.status}</b></span>
         <SubmitButton id={c.id} status={c.status} />
         <PublishButton id={c.id} status={c.status} isReviewerOwn={me.role === "reviewer" && c.authorEmail === me.email} />
         <a className="btn2" href="/history">Share to LinkedIn Composer</a>
+        <ExportButtons id={c.id} />
       </div>
+      <ScheduleForm id={c.id} status={c.status} scheduledFor={c.scheduledFor} canSchedule={(c.status === "Approved" || (me.role === "reviewer" && c.authorEmail === me.email)) && c.status !== "Published"} />
       {c.feedback && <div className="card mt-3 text-sm"><b>Oyin&apos;s feedback:</b> {c.feedback}</div>}
     </Shell>
   );

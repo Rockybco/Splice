@@ -51,6 +51,7 @@ export function Shell({ title, crumbs = [], actions = null, nav = [], user = nul
 export const creatorNav = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/generate", label: "Create Splice" },
+  { href: "/calendar", label: "Calendar" },
   { href: "/settings", label: "Brand Voice" },
   { href: "/auth/linkedin", label: "LinkedIn Sync" },
   { href: "/history", label: "History & Posts" },
