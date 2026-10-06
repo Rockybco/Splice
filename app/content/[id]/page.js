@@ -1,19 +1,19 @@
+import { redirect } from "next/navigation";
 import { Shell, creatorNav } from "@/components/SpliceShell";
+import { currentUser } from "@/lib/guard";
+import { getContent, shortId } from "@/lib/store";
 import SubmitButton from "./submit";
-import fs from "node:fs";
-import path from "node:path";
 
-export default function ContentPage({ params }) {
-  let c = null;
-  try {
-    const db = JSON.parse(fs.readFileSync(path.join(process.cwd(), "splice", "data", "db.json"), "utf-8"));
-    c = (db.contents || []).find((x) => x.id === params.id);
-  } catch {}
+export default async function ContentPage({ params }) {
+  const me = await currentUser();
+  if (!me) redirect("/auth/signup");
+  const c = await getContent(params.id);
   if (!c) return <div className="p-8">Not found. <a className="underline" href="/dashboard">Back</a></div>;
   return (
-    <Shell title="Review" crumbs={["Content Splicing Studio", "STEP 2 OF 4: Review & Customize"]} nav={creatorNav} user="Rocky B.">
+    <Shell title="Review" crumbs={["Content Splicing Studio", "STEP 2 OF 4: Review & Customize"]} nav={creatorNav} user={me.name}>
       <div className="flex gap-2 text-sm mb-3">
         <span className="tab-active font-bold px-2">LinkedIn</span><span className="px-2 text-gray-500">Instagram</span><span className="px-2 text-gray-500">X</span>
+        <span className="ml-auto text-gray-400">{shortId(c.id)}</span>
       </div>
       <div className="grid md:grid-cols-2 gap-4">
         <div className="card"><div className="font-bold text-sm">ORIGINAL (read-only)</div><div className="text-sm mt-2 bg-gray-50 p-3 rounded">{c.original}</div></div>

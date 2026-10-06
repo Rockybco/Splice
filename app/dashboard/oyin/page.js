@@ -1,17 +1,12 @@
 import { redirect } from "next/navigation";
 import { Shell, oyinNav } from "@/components/SpliceShell";
 import { currentUser } from "@/lib/guard";
-import fs from "node:fs";
-import path from "node:path";
+import { listContents } from "@/lib/store";
 
-export default function OyinDash() {
-  const me = currentUser();
+export default async function OyinDash() {
+  const me = await currentUser();
   if (!me || me.role !== "reviewer") redirect("/auth/signup");
-  let pending = [];
-  try {
-    const db = JSON.parse(fs.readFileSync(path.join(process.cwd(), "splice", "data", "db.json"), "utf-8"));
-    pending = (db.contents || []).filter((c) => c.status === "Draft" || c.status === "In Review").slice(0, 5);
-  } catch {}
+  const pending = await listContents({ statuses: ["Draft", "In Review"], limit: 5 });
   return (
     <Shell title="Oyin" crumbs={["Splice OS", "Oyin Dashboard"]} nav={oyinNav} user="Oyin (Reviewer)">
       <h1 className="text-2xl font-extrabold">Welcome back, Oyin 🧵</h1>

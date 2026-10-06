@@ -1,16 +1,12 @@
 import { redirect } from "next/navigation";
 import { Shell, oyinNav } from "@/components/SpliceShell";
 import { currentUser } from "@/lib/guard";
-import fs from "node:fs";
-import path from "node:path";
-export default function Queue() {
-  const me = currentUser();
+import { listContents } from "@/lib/store";
+
+export default async function Queue() {
+  const me = await currentUser();
   if (!me || me.role !== "reviewer") redirect("/auth/signup");
-  let items = [];
-  try {
-    const db = JSON.parse(fs.readFileSync(path.join(process.cwd(), "splice", "data", "db.json"), "utf-8"));
-    items = (db.contents || []).filter((c) => ["Draft", "In Review"].includes(c.status));
-  } catch {}
+  const items = await listContents({ statuses: ["Draft", "In Review"], limit: 50 });
   return (
     <Shell title="Queue" crumbs={["Splice OS", "Review Queue"]} nav={oyinNav} user="Oyin">
       <div className="card"><div className="font-bold">Content Review Queue · {items.length} waiting</div>

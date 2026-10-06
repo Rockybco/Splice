@@ -1,15 +1,14 @@
+import { redirect } from "next/navigation";
 import { Shell, creatorNav } from "@/components/SpliceShell";
-import fs from "node:fs";
-import path from "node:path";
+import { currentUser } from "@/lib/guard";
+import { listContents } from "@/lib/store";
 
-export default function History() {
-  let contents = [];
-  try {
-    const db = JSON.parse(fs.readFileSync(path.join(process.cwd(), "splice", "data", "db.json"), "utf-8"));
-    contents = db.contents || [];
-  } catch {}
+export default async function History() {
+  const me = await currentUser();
+  if (!me) redirect("/auth/signup");
+  const contents = await listContents({ authorEmail: me.email, limit: 100 });
   return (
-    <Shell title="History" crumbs={["Splice History & Archive"]} nav={creatorNav} user="Rocky B.">
+    <Shell title="History" crumbs={["Splice History & Archive"]} nav={creatorNav} user={me.name}>
       <div className="card">
         <div className="font-bold">All · Published · Drafts · Archived</div>
         <table className="w-full text-sm mt-3">

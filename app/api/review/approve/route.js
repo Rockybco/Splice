@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { loadDb, saveDb, audit, currentUser } from "@/lib/guard";
+import { currentUser } from "@/lib/guard";
+import { getContent, updateContent, addAudit } from "@/lib/store";
 
 async function notify(email, subject, html) {
   if (!process.env.RESEND_API_KEY) return;
@@ -13,21 +14,19 @@ async function notify(email, subject, html) {
 
 // Oyin approves In Review → Approved (author notified, eligible for scheduling).
 export async function POST(req) {
-  const me = currentUser();
+  const me = await currentUser();
   if (!me || me.role !== "reviewer") return NextResponse.json({ error: "Reviewer only" }, { status: 403 });
   const { id, edited } = await req.json();
-  const db = loadDb();
-  const c = db.contents.find((x) => x.id === id);
+  const c = await getContent(id);
   if (!c) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (c.authorEmail === me.email) return NextResponse.json({ error: "Oyin posts skip approval" }, { status: 400 });
   if (c.status !== "In Review") return NextResponse.json({ error: `Cannot approve from ${c.status}` }, { status: 400 });
-  if (edited?.linkedin) c.linkedin = edited.linkedin;
-  if (edited?.carousel) c.carousel = edited.carousel;
-  if (edited?.thread) c.thread = edited.thread;
-  c.status = "Approved";
-  c.reviewer = me.email;
-  audit(db, me.email, "approved", id);
-  saveDb(db);
-  await notify(c.authorEmail, `Your content was approved by Oyin (${id})`, `<p>Oyin approved <b>${id}</b>. You can now schedule it.</p>`);
-  return NextResponse.json({ ok: true, status: c.status });
+  const patch = { status: "Approved" };
+  if (edited?.linkedin) patch.linkedin = edited.linkedin;
+  if (edited?.carousel) patch.carousel = edited.carousel;
+  if (edited?.thread) patch.thread = edited.thread;
+  const updated = await updateContent(id, patch, me.email);
+  await addAudit(me.email, "approved", id);
+  await notify(c.authorEmail, `Your content was approved by Oyin`, `<p>Oyin approved your content. You can now schedule it.</p>`);
+  return NextResponse.json({ ok: true, status: updated?.status || "Approved" });
 }

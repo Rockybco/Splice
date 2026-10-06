@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { checkPassword, signSession, COOKIE } from "@/lib/auth";
-import { loadDb } from "@/lib/guard";
+import { getUserByEmail } from "@/lib/store";
 
 export async function POST(req) {
   const { email, password } = await req.json();
-  const db = loadDb();
-  const u = db.users.find((x) => x.email === email);
+  const u = await getUserByEmail(email);
   if (!u || !(await checkPassword(password || "", u.passwordHash || ""))) {
     return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
   }

@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { Shell, oyinNav } from "@/components/SpliceShell";
 import { currentUser } from "@/lib/guard";
-export default function OyinMine() {
-  const me = currentUser();
+export default async function OyinMine() {
+  const me = await currentUser();
   if (!me || me.role !== "reviewer") redirect("/auth/signup");
   return (
     <Shell title="My Content" crumbs={["Splice OS", "My Content (Oyin)"]} nav={oyinNav} user="Oyin">

@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
-import { loadDb, saveDb } from "@/lib/guard";
+import { getUserByEmail, saveOtp } from "@/lib/store";
 
 export async function POST(req) {
   const { email } = await req.json();
-  const db = loadDb();
-  const u = db.users.find((x) => x.email === email);
+  const u = await getUserByEmail(email);
   if (!u) return NextResponse.json({ error: "No account with that email" }, { status: 404 });
   const code = String(Math.floor(100000 + Math.random() * 900000));
-  db.otps = db.otps.filter((o) => o.email !== email);
-  db.otps.push({ email, code, exp: Date.now() + 10 * 60 * 1000, kind: "reset" });
-  saveDb(db);
+  await saveOtp({ email, code, kind: "reset" });
   if (process.env.RESEND_API_KEY) {
     try {
       const { Resend } = await import("resend");

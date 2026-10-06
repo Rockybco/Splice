@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { loadDb, saveDb, audit, currentUser } from "@/lib/guard";
+import { currentUser } from "@/lib/guard";
+import { getContent, updateContent, addAudit } from "@/lib/store";
 
 async function notify(email, subject, html) {
   if (!process.env.RESEND_API_KEY) return;
@@ -13,19 +14,15 @@ async function notify(email, subject, html) {
 
 // Oyin requests changes: In Review → Changes Requested + feedback emailed.
 export async function POST(req) {
-  const me = currentUser();
+  const me = await currentUser();
   if (!me || me.role !== "reviewer") return NextResponse.json({ error: "Reviewer only" }, { status: 403 });
   const { id, feedback } = await req.json();
   if (!feedback || feedback.length > 500) return NextResponse.json({ error: "Feedback required (max 500 chars)" }, { status: 400 });
-  const db = loadDb();
-  const c = db.contents.find((x) => x.id === id);
+  const c = await getContent(id);
   if (!c) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (c.status !== "In Review") return NextResponse.json({ error: `Cannot request changes from ${c.status}` }, { status: 400 });
-  c.status = "Changes Requested";
-  c.feedback = feedback;
-  c.reviewer = me.email;
-  audit(db, me.email, "requested-changes", `${id}: ${feedback.slice(0, 80)}`);
-  saveDb(db);
-  await notify(c.authorEmail, `Oyin requested changes (${id})`, `<p>Oyin requested changes on <b>${id}</b>:</p><blockquote>${feedback}</blockquote>`);
-  return NextResponse.json({ ok: true, status: c.status });
+  const updated = await updateContent(id, { status: "Changes Requested", feedback }, me.email);
+  await addAudit(me.email, "requested-changes", `${id}: ${feedback.slice(0, 80)}`);
+  await notify(c.authorEmail, `Oyin requested changes`, `<p>Oyin requested changes:</p><blockquote>${feedback}</blockquote>`);
+  return NextResponse.json({ ok: true, status: updated?.status || "Changes Requested" });
 }
